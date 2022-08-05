@@ -1,32 +1,86 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
+type Todo = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
+
+const createTodo = (title: string): Todo => {
+  return {
+    id: uuidv4(),
+    title,
+    completed: false,
+  };
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [title, setTitle] = useState('');
+
+  const onSubmitHandler: React.FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    const todo = createTodo(title);
+    setTodos([...todos, todo]);
+  }
 
   return (
-    <div className="App">
+    <div>
+      <h1>
+        簡易Todoアプリ
+      </h1>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <form onSubmit={onSubmitHandler} method="post">
+          <label htmlFor="">
+            タイトル:
+            <input type="text" value={title}
+              onChange={(event) => {
+                setTitle(event.target.value);
+              }
+              } />
+          </label>
+          <input type="submit" value="作成" />
+        </form>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+
+      <table border={1}>
+        <thead>
+          <th>id</th>
+          <th>タイトル</th>
+          <th>進捗</th></thead>
+        <tbody>
+          {todos.map((todo) => {
+            const { id, completed, title } = todo;
+            return (
+              <tr key={id}>
+                <td>{id}</td>
+                <td>{title}</td>
+                <td>
+                  <input
+                    type="checkbox"
+                    name=""
+                    id=""
+                    checked={todo.completed}
+                    onChange={(event) => {
+                      const newTodos = todos.map(_todo => {
+                        if (_todo.id === todo.id) {
+                          return {
+                            ...todo,
+                            completed: !todo.completed,
+                          };
+                        }
+                        return _todo;
+                      });
+                      setTodos(newTodos);
+                    }}
+                  />
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   )
 }
